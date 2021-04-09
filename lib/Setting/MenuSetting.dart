@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/Courses/Home.dart';
 void main() {
   runApp(MenuSetting());
 }
@@ -10,7 +11,7 @@ class MenuSetting extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
           appBarTheme: AppBarTheme(
-            color: Colors.grey,
+            color: Colors.grey[800],
           )),
       home: MenuSettingPage(),
     );
@@ -29,7 +30,21 @@ class _MenuSettingPageState extends State<MenuSettingPage> {
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
-          title: Center(child: Text("Setting",textAlign: TextAlign.center,)),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Home()),
+                );
+              },
+                child: Text("Back", textAlign: TextAlign.center,),),
+
+              Text("Setting", textAlign: TextAlign.center,),
+              SizedBox(width: 50)
+            ],
+          ),
 
 
         ),

@@ -65,11 +65,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'PLURALSIGHT'
-              ,
-              style: TextStyle(
-                color : Colors.white,
+            Center(
+              child: Container(
+                padding: EdgeInsets.only(top:30),
+                child: CircleAvatar(
+
+                    radius: 100,
+                    child: Image.network('https://i.pinimg.com/originals/f7/64/15/f76415d3d9779400d610a0f089f551e5.jpg'),
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top:20,bottom:20),
+              child :Text(
+                'Course Online App'
+                ,
+                style: TextStyle(
+                    color : Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold
+                ),
               ),
             ),
             Container(

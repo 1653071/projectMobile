@@ -10,7 +10,7 @@ class Theme extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
           appBarTheme: AppBarTheme(
-            color: Colors.grey,
+            color: Colors.grey[800],
           )),
       home: ThemePage(),
     );

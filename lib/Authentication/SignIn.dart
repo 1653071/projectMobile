@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_app/Authentication/ForgetPassword.dart';
 void main() {
   runApp(SignIn());
 }
@@ -8,7 +8,7 @@ class SignIn extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
 
-      home: SignInPage(title: 'Sign In'),
+      home: SignInPage(title: 'Sign up'),
     );
   }
 }
@@ -32,7 +32,7 @@ class _SignInPageState extends State<SignInPage> {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Center(child: Text(widget.title,textAlign: TextAlign.center,)),
-        backgroundColor: Colors.blueGrey,
+        backgroundColor: Colors.grey[800],
 
       ),
       body:Center(
@@ -115,7 +115,16 @@ class _SignInPageState extends State<SignInPage> {
             Container(
               padding:  EdgeInsets.only(top:10,left:20,right:20),
               alignment: Alignment.center,
-              child: Text("Need Help?" ,style: TextStyle(color: Colors.grey),textAlign: TextAlign.left,),
+              child:InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ForgotPassword()),
+                    );
+                  },
+                child: Text("Forget Password?" ,style: TextStyle(color: Colors.grey),textAlign: TextAlign.left,),
+              )
+
             ),
             Container(
               margin:  EdgeInsets.only(top:10,left:20,right:20),

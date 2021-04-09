@@ -38,7 +38,7 @@ class _SearchPageState extends State<SearchPage> {
                 Icons.search,
                 color: Colors.white,
               ),
-              hintText: "Search Country Here",
+              hintText: "Search Here",
               hintStyle: TextStyle(color: Colors.white)),
         ),
 

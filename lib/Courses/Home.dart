@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/Courses/New.dart';
 import 'package:flutter_app/Courses/IntroCourse.dart';
 import 'package:flutter_app/Account/AccountHome.dart';
+import 'package:flutter_app/Setting/MenuSetting.dart';
+import 'package:flutter_app/Courses/Search.dart';
 void main() {
   runApp(Home());
 }
@@ -23,9 +25,14 @@ class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
-
+List<String> choices = <String>[
+  'Account',
+  'Settings',
+  'SignOut'
+];
 class _HomePageState extends State<HomePage> {
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.black,
@@ -35,19 +42,50 @@ class _HomePageState extends State<HomePage> {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(width: 50,),
+                IconButton(
+                  icon: const Icon(Icons.search),
+
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Search()),
+                      );
+                    }
+                ),
                 Text("Home", textAlign: TextAlign.center,),
-                InkWell(onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AccountHome()),
-                  );
-                },
-                  child: Text("Account", textAlign: TextAlign.center,),),
+                PopupMenuButton<String>(
+
+
+
+                  color: Colors.grey[800],
+                  onSelected: (String newValue) {
+                    setState(() {
+                      if (newValue == 'Account'){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AccountHome()),
+                        );
+                      }
+                      else if(newValue =='Settings'){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MenuSetting()),
+                        );
+                      }
+                    });
+                    },
+                  itemBuilder: (BuildContext context){
+                    return choices.map((String choice){
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(choice),
+
+                      );
+                    }).toList();
+                  },
+                ),
               ],
             )
-
-
         ),
         body: Column(
         children: <Widget>[
