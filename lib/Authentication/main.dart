@@ -105,6 +105,35 @@ class _MyHomePageState extends State<MyHomePage> {
                       );
                     },
                     child:Text(
+                      'Sign in',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: "Montserrat",
+                      ),),
+                  ),
+                ),
+
+              ),
+            ),
+            Container(
+
+              width: 300,
+              height: 40.0,
+              child: Material(
+                borderRadius: BorderRadius.circular(5),
+                shadowColor: Colors.blue,
+                color: Colors.blue,
+                elevation: 7.0,
+                child : Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignIn()),
+                      );
+                    },
+                    child:Text(
                       'Sign up',
                       style: TextStyle(
                         color: Colors.white,
