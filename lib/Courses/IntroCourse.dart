@@ -1,11 +1,19 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_app/model/courses/course_detail.dart';
+import 'package:flutter_app/model/teacher/teacher_detail_model.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Courses/Home.dart';
+import 'package:flutter_app/api/api_courses.dart';
+import 'package:flutter_app/model/courses/course_detail.dart';
+import 'package:flutter_app/api/api_teacher.dart';
 void main() {
-  runApp(IntroCourse());
+  runApp(IntroCourse(id: '445c1106-7dd5-4e6d-bbad-9a52dd7137c8',idInstructor: 'e79caee9-0afb-4baa-b23d-d63f63dde80d',));
 }
 class IntroCourse extends StatelessWidget {
+  String id;
+  String idInstructor;
+  IntroCourse({this.id,this.idInstructor});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,16 +21,45 @@ class IntroCourse extends StatelessWidget {
           appBarTheme: AppBarTheme(
             color: Colors.grey[800],
           )),
-      home: IntroCoursePage(),
+      home: IntroCoursePage(id:id,idInstructor: idInstructor,),
     );
   }
 }
 class IntroCoursePage extends StatefulWidget {
+  String id;
+  String idInstructor;
+  IntroCoursePage({this.id,this.idInstructor});
   @override
-  _IntroCoursePageState createState() => _IntroCoursePageState();
+  _IntroCoursePageState createState() => _IntroCoursePageState(id:id,idInstructor: idInstructor);
 }
 
 class _IntroCoursePageState extends State<IntroCoursePage> {
+   String id;
+   String idInstructor;
+   ApiProductService apiProductService= new ApiProductService();
+   ApiTeacher apiTeacher= new ApiTeacher();
+   TeacherDetail teacherDetail ;
+   CourseDetail courseDetail;
+   bool _isLoading =false;
+  _IntroCoursePageState({this.id,this.idInstructor});
+   @override
+   void initState() {
+     _fetchNotes();
+     super.initState();
+   }
+
+   _fetchNotes() async {
+
+     setState(() {
+       _isLoading = true;
+     });
+     courseDetail = await apiProductService.fetchCourseDetail(id);
+
+     teacherDetail = await apiTeacher.fetchTeacherBaseOnCourse(idInstructor);
+     setState(() {
+       _isLoading = false;
+     });
+   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,158 +85,251 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
 
 
           ),
-          body: Column(
+          body: Builder(
+            builder: (_){
+              if(_isLoading)
+                {
+                  return Center(child:CircularProgressIndicator());
+                }
+              return SingleChildScrollView(
+                child: Column(
 
-            children: <Widget>[
-             Center(child: Container(
+                  children: <Widget>[
 
-                child :Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-                  width: 600,
-                  height: 240,
-                  fit: BoxFit.cover,
-                ),
-              )),
-              Container(
-                alignment: Alignment.topLeft,
-                padding: EdgeInsets.all(10),
-                child: Text("Build app with flutter" ,style: TextStyle(fontSize: 20,color: Colors.white),textAlign: TextAlign.left,),
-              ),
-              Container(
-                alignment: Alignment.topLeft,
-                padding: EdgeInsets.all(10),
-                child:Container(
-                    height: 30,
-                    width: 150,
+                    Center(child: Container(
 
-                    alignment: Alignment.topLeft,
-                    decoration: BoxDecoration(
-
-
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(25.0),
+                      child :Image.network(teacherDetail.avatar,
+                        width: 600,
+                        height: 240,
+                        fit: BoxFit.cover,
+                      ),
+                    )),
+                    Container(
+                      alignment: Alignment.topLeft,
+                      padding: EdgeInsets.all(10),
+                      child: Text(courseDetail.title,style: TextStyle(fontSize: 30,color: Colors.white,fontWeight: FontWeight.bold),textAlign: TextAlign.left,),
                     ),
-                    child: Row(
 
-                      children: [
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Container(
+                        width: 250,
+                        height: 35,
+                        alignment: Alignment.topLeft,
+                        margin: EdgeInsets.only(left: 5),
 
-                        Container(
-                          child :CircleAvatar(
-                              radius:15,
-                              backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
+                        decoration: BoxDecoration(
+                          color: Colors.grey,
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+
+                        child :Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              width : 35,
+                              child:CircleAvatar(
+
+                                  radius:15,
+                                  backgroundImage: NetworkImage(teacherDetail.avatar)
+                              ),),
+                            TextButton(
+
+
+                              style: TextButton.styleFrom(
+                                primary: Colors.blue,
+                              ),
+                              onPressed: () { },
+                              child :Text("${teacherDetail.name}",style: TextStyle(color: Colors.white,fontSize: 14),),
+                            ),
+
+                          ],),
+                      ) ,
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                              padding: EdgeInsets.only(left:5),
+                              child:Text("Beginner", style: TextStyle(color: Colors.white),)),
+                          Container(
+                              padding: EdgeInsets.only(left:5),
+                              child:Text("Nov 12 2020", style: TextStyle(color: Colors.white),)),
+                          Container(
+                            padding: EdgeInsets.only(left:5),
+                            child :SmoothStarRating(
+                              rating: 5,
+                              size: 20,
+                              starCount: 5,
+                              color: Colors.yellow,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.only(right: 10,left: 10),
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(
+                              color: Colors.grey,
+                              width: 1
+                          ))
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+
+                          Column(
+                            children: [
+                              CircleAvatar(
+
+                                  radius: 20,
+                                  backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
+                              ),
+                              Text("Subcribe",style: TextStyle(color: Colors.white),)
+                            ],
                           ),
-                        ),
-                        TextButton(
+                          Column(
+                            children: [
+                              CircleAvatar(
 
-                          style: TextButton.styleFrom(
-                            primary: Colors.blue,
+                                  radius: 20,
+                                  backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
+                              ),
+                              Text("Subcribe",style: TextStyle(color: Colors.white),)
+                            ],
                           ),
-                          onPressed: () { },
-                          child :Text('Jackson',style: TextStyle(color: Colors.white,fontSize: 14),),
-                        ),
-                      ],)
-                ),
+                          Column(
+                            children: [
+                              CircleAvatar(
 
-              ),
-            Container(
-              padding: EdgeInsets.all(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                      padding: EdgeInsets.only(left:5),
-                      child:Text("Beginner", style: TextStyle(color: Colors.white),)),
-                  Container(
-                      padding: EdgeInsets.only(left:5),
-                      child:Text("Nov 12 2020", style: TextStyle(color: Colors.white),)),
-                  Container(
-                    padding: EdgeInsets.only(left:5),
-                    child :SmoothStarRating(
-                      rating: 5,
-                      size: 20,
-                      starCount: 5,
-                      color: Colors.yellow,
+                                  radius: 20,
+                                  backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
+                              ),
+                              Text("Subcribe",style: TextStyle(color: Colors.white),)
+                            ],
+                          )
+                        ],
+                      ),
                     ),
-                  )
-                ],
-              ),
-            ),
-              Container(
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(right: 10,left: 10),
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(
-                        color: Colors.grey,
-                        width: 1
-                    ))
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
+                    Container(
+                      height: 100,
+                      alignment: Alignment.topLeft,
+                      margin: EdgeInsets.only(right: 10,left: 10,top: 10),
+                      padding: EdgeInsets.all(10),
 
-                    Column(
-                      children: [
-                        CircleAvatar(
+                      decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(
+                                  color: Colors.grey,
+                                  width: 1
+                              ))
+                      ),
+                      child: Scrollbar(
 
-                            radius: 20,
-                            backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
-                        ),
-                        Text("Subcribe",style: TextStyle(color: Colors.white),)
-                      ],
+                          child:SingleChildScrollView(
+                              scrollDirection: Axis.vertical,
+
+
+                              child :Text(courseDetail.description,
+                                style: TextStyle(color: Colors.white),)
+                          )
+                      ),
+
                     ),
-                    Column(
-                      children: [
-                        CircleAvatar(
+                    SizedBox(height: 20),
+                    Container(
+                        child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: Colors.white,
+                            ),
+                            child: Stack(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.all(30),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Text("Course Content", style: TextStyle(
+                                          fontSize: 20,
+                                          color: Color(0xFF0D1333),
+                                          fontWeight: FontWeight.bold,
+                                        )),
+                                        SizedBox(height: 30),
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom: 30),
+                                          child: Row(
+                                            children: <Widget>[
+                                              Text(
+                                                "1",
+                                                style: TextStyle(
+                                                  fontSize: 28,
+                                                  color: Colors.green,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(width: 20),
+                                              RichText(
+                                                text: TextSpan(
+                                                  children: [
+                                                    TextSpan(
+                                                      text: "mins",
+                                                      style: TextStyle(
+                                                        color: Color(0xFF0D1333).withOpacity(.5),
+                                                        fontSize: 18,
+                                                      ),
+                                                    ),
+                                                    TextSpan(
 
-                            radius: 20,
-                            backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
-                        ),
-                        Text("Subcribe",style: TextStyle(color: Colors.white),)
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        CircleAvatar(
+                                                      style: TextStyle(
+                                                        fontSize: 18,
+                                                        color: Color(0xFF0D1333),
+                                                        // fontWeight: FontWeight.bold,
+                                                      ).copyWith(
+                                                        fontWeight: FontWeight.w600,
+                                                        height: 1.5,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Spacer(),
+                                              Container(
+                                                margin: EdgeInsets.only(left: 20),
+                                                height: 40,
+                                                width: 40,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.green,
+                                                ),
+                                                child: Icon(Icons.play_arrow, color: Colors.white),
+                                              )
+                                            ],
+                                          ),
+                                        )
 
-                            radius: 20,
-                            backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
-                        ),
-                        Text("Subcribe",style: TextStyle(color: Colors.white),)
-                      ],
-                    )
+
+
+                                      ],
+                                    ),
+                                  ),
+                                ])
+                        ))
+
+
+
                   ],
                 ),
-              ),
-              Container(
-                height: 100,
-                alignment: Alignment.topLeft,
-                margin: EdgeInsets.only(right: 10,left: 10,top: 10),
-                padding: EdgeInsets.all(10),
-
-                decoration: BoxDecoration(
-                    border: Border(
-                        bottom: BorderSide(
-                        color: Colors.grey,
-                        width: 1
-                    ))
-                ),
-                child: Scrollbar(
-
-                    child:SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-
-
-                        child :Text("Flutter là một SDK phát triển ứng dụng di động nguồn mở được tạo ra bởi Google. Nó được sử dụng để phát triển ứng ứng dụng cho Android và iOS, cũng là phương thức chính để tạo ứng dụng cho Google Fuchsia",
-                          style: TextStyle(color: Colors.white),)
-                    )
-                ),
-
-              )
-
-            ],
-          ),
+              );
+            },
+          )
 
     );
   }
 }
-

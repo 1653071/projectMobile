@@ -16,7 +16,7 @@ class Courses{
   double ratedNumber;
   int videoNumber;
   double totalHours;
-  int formalityPoint;
+  double formalityPoint;
   int contentPoint;
   int presentationPoint;
   String imageUrl;
@@ -67,7 +67,7 @@ class Courses{
       ratedNumber: json["ratedNumber"].toDouble(),
       videoNumber:json["videoNumber"],
       totalHours: json["totalHours"].toDouble(),
-      formalityPoint: json["formalityPoint"] ,
+      formalityPoint: json["formalityPoint"].toDouble() ,
       contentPoint: json["contentPoint"],
       presentationPoint: json["presentationPoint"],
       imageUrl: json["imageUrl"],

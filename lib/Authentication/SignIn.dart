@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/Authentication/ForgetPassword.dart';
 import 'package:flutter_app/api/api_login.dart';
 import 'package:flutter_app/Courses/Home.dart';
+import 'package:flutter_app/model/login_model.dart';
+import 'package:flutter_app/share_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   runApp(SignIn());
 }
@@ -32,7 +38,85 @@ class _SignInPageState extends State<SignInPage> {
   final usernameController= TextEditingController();
   final phoneController = TextEditingController();
   final passwordController= TextEditingController();
+  LoginResponseModel loginResponseModel = new LoginResponseModel();
   String message = '';
+  String msgLoginFail ='Login Fail';
+  String msgLoginFail1 ='You log in false. Please check you have right username or password';
+  String msgActivate='Activate';
+  String msgActivate1='Please activate your email';
+
+  void _showcontent1(String msg,String msg1) {
+    showDialog(
+      context: context, barrierDismissible: false, // user must tap button!
+
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          title: new Text(msg),
+          content: new SingleChildScrollView(
+            child: new ListBody(
+              children: [
+                new Text(msg1),
+              ],
+            ),
+          ),
+          actions: [
+            new FlatButton(
+              child: new Text('Ok'),
+              onPressed: () async {
+                String email=emailController.text;
+                ApiService api = new ApiService();
+                var response = await api.ActivateEmail(email);
+                if(response.statusCode==200)
+                {
+                  var jsonData = jsonDecode(response.body);
+                  String token = jsonData["token"];
+                  print(token);
+                }
+                else{
+
+                }
+                // ignore: unrelated_type_equality_checks
+
+
+              },
+            ),
+            new FlatButton(
+              child: new Text('Cancle'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showcontent2(String msg,String msg1) {
+    showDialog(
+      context: context, barrierDismissible: false, // user must tap button!
+
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          title: new Text(msg),
+          content: new SingleChildScrollView(
+            child: new ListBody(
+              children: [
+                new Text(msg1),
+              ],
+            ),
+          ),
+          actions: [
+            new FlatButton(
+              child: new Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,34 +212,42 @@ class _SignInPageState extends State<SignInPage> {
                       child : Center(
 
                         child : TextButton(
-                          onPressed: () async{
-                            if(globalFormKey.currentState.validate()){
-                              var email= emailController.text;
+                          onPressed: () async {
+                            if (globalFormKey.currentState.validate()) {
+                              var email = emailController.text;
                               var password = passwordController.text;
-                              var phone= phoneController.text;
+                              var phone = phoneController.text;
                               var username = usernameController.text;
                               ApiService api = new ApiService();
 
-                              var rsp = await api.LoginUser(email, password);
 
-                              print(rsp);
-                              if(rsp['token'] != null){
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => Home()),
-                                );
+                              String url = "https://api.letstudy.org/user/login";
+                              final response = await http.post(Uri.parse(
+                                  "https://api.letstudy.org/user/login"),
+                                  body: {'email': email, 'password': password}
+                              );
+                              if (response.statusCode == 403) {
+                                _showcontent1(msgActivate, msgActivate1);
                               }
+                              else if (response.statusCode == 400) {
+                                _showcontent2(msgLoginFail, msgLoginFail1);
+                              }
+                              else if (response.statusCode == 200) {
+                                var convertdatatoJson = jsonDecode(
+                                    response.body);
+                                var jsonData = jsonDecode(response.body);
 
-                              else
-                              {
-                                setState(() {
-                                  message=rsp['message'];
-                                });
+                                loginResponseModel =
+                                    LoginResponseModel.fromJson(jsonData);
 
+                                if (loginResponseModel.token != null) {
+                                  SharedService.setLoginDetails(
+                                      loginResponseModel);
+                                }
                               }
                             }
-
-                          },
+                          }
+                        ,
                           child: Text(
                             'Sign up',
                             style: TextStyle(

@@ -3,6 +3,7 @@ import 'package:flutter_app/Authentication/ForgetPassword.dart';
 import 'package:flutter_app/Authentication/main.dart';
 import 'package:flutter_app/api/api_login.dart';
 import 'package:flutter_app/Authentication/SignIn.dart';
+
 import 'package:flutter_app/model/register_model.dart';
 void main() {
   runApp(SignUp());
@@ -34,6 +35,32 @@ class _SignUpPageState extends State<SignUpPage> {
   final phoneController = TextEditingController();
   final passwordController= TextEditingController();
   String message='';
+  void _showcontent() {
+    showDialog(
+      context: context, barrierDismissible: false, // user must tap button!
+
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          title: new Text('You clicked on'),
+          content: new SingleChildScrollView(
+            child: new ListBody(
+              children: [
+                new Text('This is a Dialog Box. Click OK to Close.'),
+              ],
+            ),
+          ),
+          actions: [
+            new FlatButton(
+              child: new Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   @override
 
   Widget build(BuildContext context) {
@@ -52,6 +79,7 @@ class _SignUpPageState extends State<SignUpPage> {
             mainAxisAlignment: MainAxisAlignment.center,
 
             children: <Widget>[
+
               Form (
                 key:globalFormKey,
                 child:Column(
@@ -98,9 +126,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: TextFormField(
                         controller: emailController,
                         validator: (value){
-                          if(value.isEmpty){
+                          if(value.isEmpty ){
                             return "Email can not empty";
-                          }
+                          }else if (!value.contains("@gmail.com")
+                          )
                            return null;
                         },
                         decoration: InputDecoration(
@@ -206,17 +235,16 @@ class _SignUpPageState extends State<SignUpPage> {
 
                                 print(rsp);
                                 if(rsp['message']=="OK" ){
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => SignIn()),
-                                  );
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(builder: (context) => SignIn()),
+                                  // );
+                                  _showcontent();
                                 }
 
                                 else
                                   {
-                                    setState(() {
-                                        message=rsp['message'];
-                                    });
+                                    _showcontent();
 
                                   }
                               }
