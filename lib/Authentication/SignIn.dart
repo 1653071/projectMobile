@@ -7,6 +7,7 @@ import 'package:flutter_app/share_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter_app/share_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   runApp(SignIn());
@@ -237,13 +238,16 @@ class _SignInPageState extends State<SignInPage> {
                                     response.body);
                                 var jsonData = jsonDecode(response.body);
 
-                                loginResponseModel =
-                                    LoginResponseModel.fromJson(jsonData);
+                                String token = jsonData["token"];
+                                  SharedService.SetUserLogin(token);
+                                SharedPreferences prefs = await SharedPreferences.getInstance();
+                                  String token1 = prefs.getString("token");
+                                  print(token1);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => Home()),
+                                  );
 
-                                if (loginResponseModel.token != null) {
-                                  SharedService.setLoginDetails(
-                                      loginResponseModel);
-                                }
                               }
                             }
                           }

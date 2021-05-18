@@ -1,4 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_app/Authentication/ChangePassword.dart';
+import 'package:flutter_app/Authentication/SignIn.dart';
+import 'package:flutter_app/Courses/Favorite.dart';
+import 'package:flutter_app/api/api_login.dart';
+import 'package:flutter_app/model/courses/course_withlesson.dart';
+import 'package:flutter_app/model/user/user_model.dart';
+import 'package:flutter_app/share_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Courses/New.dart';
@@ -13,9 +21,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_app/api/api_teacher.dart';
 import 'package:flutter_app/api/api_category.dart';
 import 'package:flutter_app/model/category/category.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import'dart:convert';
-import 'dart:async';
+
 void main() {
   runApp(Home());
 }
@@ -38,23 +44,31 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 List<String> choices = <String>[
-  'Account',
+  'Information',
+  'Favorite',
   'Settings',
+  'ChangePassword',
   'SignOut'
 ];
 class _HomePageState extends State<HomePage> {
   ApiProductService apiProductService= new ApiProductService();
  ApiTeacher apiTeacher= new ApiTeacher();
  ApiCategoryService apiCategoryService = new ApiCategoryService();
+ ApiService apiService = new ApiService();
   List<Courses> courses;
   List<Courses> coursesTrending;
   List<Teacher> teachers;
   List<Category> categories;
 
+  User user;
+  String token ;
+
     bool _isLoading =false;
   @override
   void initState() {
     _fetchNotes();
+
+
     super.initState();
   }
 
@@ -66,6 +80,11 @@ class _HomePageState extends State<HomePage> {
     courses = await apiProductService.fetchCourses();
     coursesTrending=await apiProductService.fetchTrendingCourses();
     categories = await apiCategoryService.fetchCategory();
+
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    token = pref.getString("token");
+    user = await apiService.getUserInfo(token);
+    print(user.id);
     setState(() {
       _isLoading = false;
     });
@@ -93,36 +112,74 @@ class _HomePageState extends State<HomePage> {
                     }
                 ),
                 Text("Home", textAlign: TextAlign.center,),
-                PopupMenuButton<String>(
+                Container(
+                  child :Row(
+                    children: [
+                      Builder(
+                          builder:(_){
+                            if(_isLoading){
+                              return Center(child: CircularProgressIndicator());
+                            }
+                            else{
+                              return CircleAvatar(
+                                  radius: 18,
+                                  backgroundImage: NetworkImage(user.avatar)
+                              );
+                            }
+                          }
+                          ),
+                      PopupMenuButton<String>(
+                        color: Colors.grey[800],
+                        onSelected: (String newValue) {
+                          setState(() {
+                            if (newValue == 'Account'){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => AccountHome()),
+                              );
+                            }
+                            else if(newValue =='Settings'){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => MenuSetting()),
+                              );
+                            }
+                            else if(newValue =='Favorite'){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => Favorite()),
+                              );
+                            }
+                            else if (newValue == 'SignOut')
+                            {
+                              SharedService.logout();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => SignIn()),
+                              );
+                            }else if (newValue == 'ChangePassword')
+                            {
 
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => ChangePassword(id: user.id,)),
+                              );
+                            }
 
+                          });
+                        },
+                        itemBuilder: (BuildContext context){
+                          return choices.map((String choice){
+                            return PopupMenuItem<String>(
+                              value: choice,
+                              child: Text(choice),
 
-                  color: Colors.grey[800],
-                  onSelected: (String newValue) {
-                    setState(() {
-                      if (newValue == 'Account'){
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => AccountHome()),
-                        );
-                      }
-                      else if(newValue =='Settings'){
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => MenuSetting()),
-                        );
-                      }
-                    });
-                    },
-                  itemBuilder: (BuildContext context){
-                    return choices.map((String choice){
-                      return PopupMenuItem<String>(
-                        value: choice,
-                        child: Text(choice),
-
-                      );
-                    }).toList();
-                  },
+                            );
+                          }).toList();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ],
             )
@@ -146,22 +203,27 @@ class _HomePageState extends State<HomePage> {
                              shrinkWrap: true,
                              itemCount: categories.length,
                              itemBuilder: (context,index){
-                               return  Container(
+                               return  InkWell(
+                                 onTap: (){
 
-                                 height: 20,
-                                 margin: EdgeInsets.only(left: 10),
-                                 decoration: BoxDecoration(
-                                   color: Colors.grey[800],
-                                   borderRadius: BorderRadius.circular(20.0),
-                                 ),
-                                 child: Center(
-                                   child: Padding(
-                                     padding: EdgeInsets.symmetric(
-                                         horizontal: 22.0, vertical: 6.0),
-                                     child: Text(categories[index].name,
-                                         style: TextStyle(color: Colors.white)),
+                                 },
+                                 child: Container(
+
+                                   height: 20,
+                                   margin: EdgeInsets.only(left: 10),
+                                   decoration: BoxDecoration(
+                                     color: Colors.grey[800],
+                                     borderRadius: BorderRadius.circular(20.0),
                                    ),
-                                 ),
+                                   child: Center(
+                                     child: Padding(
+                                       padding: EdgeInsets.symmetric(
+                                           horizontal: 22.0, vertical: 6.0),
+                                       child: Text(categories[index].name,
+                                           style: TextStyle(color: Colors.white)),
+                                     ),
+                                   ),
+                                 )
                                );
                              }),
                        )
@@ -221,8 +283,18 @@ class _HomePageState extends State<HomePage> {
                             shrinkWrap: true,
                             itemCount: courses.length,
                             itemBuilder: (context, index) {
-                              return Container(
-                                margin: EdgeInsets.only(left: 20),
+                              String id = courses[index].id;
+                              String idI = courses[index].instructorId;
+                              return GestureDetector(
+                                onTap: (){
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => IntroCourse(id: id,idInstructor: idI)),
+                                  );
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 20),
                                   width: 250,
                                   decoration: BoxDecoration(
                                     color: Colors.grey[800],
@@ -242,13 +314,11 @@ class _HomePageState extends State<HomePage> {
                                     child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.stretch,
                                         children:[
-                                          InkWell(
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(builder: (context) => IntroCourse()),
-                                                );
-                                                },
+                                          InkWell(onTap: () {
+                                            Navigator.push(
+                                            context,
+                                            MaterialPageRoute(builder: (context) => IntroCourse(id: id,idInstructor: idI)));
+                                          },
                                               child: Ink.image(
                                                   height: 150,
                                                   fit: BoxFit.cover,
@@ -282,6 +352,7 @@ class _HomePageState extends State<HomePage> {
                                         ]
                                     ),
                                   ),
+                                )
                               );
                             }
                         )
@@ -329,84 +400,84 @@ class _HomePageState extends State<HomePage> {
                     if (_isLoading) {
                       return Center(child: CircularProgressIndicator());
                     }
-                    return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => IntroCourse()),
-                          );
-                        },
-                       child: Container(
-                            height: 300,
-                            child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                shrinkWrap: true,
-                                itemCount: coursesTrending.length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    margin: EdgeInsets.only(left: 20),
-                                    width: 250,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[800],
+                    return Container(
+                        height: 300,
+                        child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            shrinkWrap: true,
+                            itemCount: coursesTrending.length,
+                            itemBuilder: (context, index) {
+                              return InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => IntroCourse(id: coursesTrending[index].id,idInstructor: coursesTrending[index].instructorId)),
+                                    );
+                                  },
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 20),
+                                  width: 250,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[800],
 
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.white.withOpacity(0.2),
-                                          spreadRadius: 5,
-                                          blurRadius: 7,
-                                          offset: Offset(0, 3), // changes position of shadow
-                                        ),
-                                      ],
-
-                                    ),
-                                    child :Card(
-                                      color:Colors.grey[800],
-                                      child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          children:[
-                                            InkWell(
-                                                onTap: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(builder: (context) => IntroCourse()),
-                                                  );
-                                                },
-                                                child: Ink.image(
-                                                    height: 150,
-                                                    fit: BoxFit.cover,
-                                                    image: NetworkImage(
-                                                      coursesTrending[index].imageUrl,
-
-                                                    )
-                                                )
-                                            ),
-
-                                            ListTile(
-
-                                              title: Text(coursesTrending[index].title,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20)),
-
-                                              subtitle: Text(
-                                                coursesTrending[index].subtitle,
-                                                style: TextStyle(color: Colors.white.withOpacity(0.6)),
-                                              ),
-                                            ),
-                                            Container(
-                                              padding: EdgeInsets.only(left: 10),
-                                              alignment: Alignment.bottomLeft,
-                                              child :SmoothStarRating(
-                                                rating: coursesTrending[index].ratedNumber,
-                                                size: 20,
-                                                starCount: 5,
-                                                isReadOnly: true,
-                                                color: Colors.yellow,
-                                              ),)
-
-                                          ]
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.white.withOpacity(0.2),
+                                        spreadRadius: 5,
+                                        blurRadius: 7,
+                                        offset: Offset(0, 3), // changes position of shadow
                                       ),
+                                    ],
+
+                                  ),
+                                  child :Card(
+                                    color:Colors.grey[800],
+                                    child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children:[
+                                          InkWell(
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => IntroCourse(id: coursesTrending[index].id,idInstructor: coursesTrending[index].instructorId,)),
+                                                );
+                                              },
+                                              child: Ink.image(
+                                                  height: 150,
+                                                  fit: BoxFit.cover,
+                                                  image: NetworkImage(
+                                                    coursesTrending[index].imageUrl,
+
+                                                  )
+                                              )
+                                          ),
+
+                                          ListTile(
+
+                                            title: Text(coursesTrending[index].title,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20)),
+
+                                            subtitle: Text(
+                                              coursesTrending[index].subtitle,
+                                              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.only(left: 10),
+                                            alignment: Alignment.bottomLeft,
+                                            child :SmoothStarRating(
+                                              rating: coursesTrending[index].ratedNumber,
+                                              size: 20,
+                                              starCount: 5,
+                                              isReadOnly: true,
+                                              color: Colors.yellow,
+                                            ),)
+
+                                        ]
                                     ),
-                                  );
-                                }
-                            )
+                                  ),
+                                )
+                              );
+                            }
                         )
                     );
                   }

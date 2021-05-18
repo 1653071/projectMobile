@@ -1,15 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/model/courses/course_detail.dart';
+import 'package:flutter_app/model/courses/course_favorite.dart';
+import 'package:flutter_app/model/courses/course_withlesson.dart';
 import 'package:flutter_app/model/teacher/teacher_detail_model.dart';
+import 'package:flutter_app/share_service.dart';
+import 'package:like_button/like_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Courses/Home.dart';
 import 'package:flutter_app/api/api_courses.dart';
 import 'package:flutter_app/model/courses/course_detail.dart';
 import 'package:flutter_app/api/api_teacher.dart';
-void main() {
-  runApp(IntroCourse(id: '445c1106-7dd5-4e6d-bbad-9a52dd7137c8',idInstructor: 'e79caee9-0afb-4baa-b23d-d63f63dde80d',));
-}
+
 class IntroCourse extends StatelessWidget {
   String id;
   String idInstructor;
@@ -39,9 +42,12 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
    ApiProductService apiProductService= new ApiProductService();
    ApiTeacher apiTeacher= new ApiTeacher();
    TeacherDetail teacherDetail ;
-   CourseDetail courseDetail;
+   CourseDetail courseWithLessons;
+   StatusFavorite coursesFavorite;
    bool _isLoading =false;
+   String token;
   _IntroCoursePageState({this.id,this.idInstructor});
+
    @override
    void initState() {
      _fetchNotes();
@@ -53,8 +59,10 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
      setState(() {
        _isLoading = true;
      });
-     courseDetail = await apiProductService.fetchCourseDetail(id);
-
+     SharedPreferences pref = await SharedPreferences.getInstance();
+     token = pref.getString("token");
+     courseWithLessons = await apiProductService.fetchCourseDetail(id);
+     coursesFavorite = await apiProductService.StatusFavoriteCourse(id, token);
      teacherDetail = await apiTeacher.fetchTeacherBaseOnCourse(idInstructor);
      setState(() {
        _isLoading = false;
@@ -107,7 +115,7 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
                     Container(
                       alignment: Alignment.topLeft,
                       padding: EdgeInsets.all(10),
-                      child: Text(courseDetail.title,style: TextStyle(fontSize: 30,color: Colors.white,fontWeight: FontWeight.bold),textAlign: TextAlign.left,),
+                      child: Text(courseWithLessons.title,style: TextStyle(fontSize: 30,color: Colors.white,fontWeight: FontWeight.bold),textAlign: TextAlign.left,),
                     ),
 
                     Align(
@@ -185,22 +193,79 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
 
                           Column(
                             children: [
-                              CircleAvatar(
 
-                                  radius: 20,
-                                  backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
+                              LikeButton(
+                                size: 50,
+                                likeBuilder: (bool isLiked){
+                                  if(coursesFavorite.likeStatus == true){
+                                    return Icon(
+                                        Icons.favorite,
+                                        color:  Colors.red,
+                                        size :30
+                                    );
+                                  }
+                                  else{
+                                    if(isLiked){
+                                      ApiProductService.LikeCourses(token, id);
+                                      return Icon(
+                                          Icons.favorite,
+                                          color:  Colors.red,
+                                          size :30
+                                      );
+                                    }
+                                    else{
+                                      return Icon(
+                                          Icons.favorite,
+                                          color:  Colors.white,
+                                          size :30
+                                      );
+                                    }
+                                  }
+                                },
+
+
+
                               ),
-                              Text("Subcribe",style: TextStyle(color: Colors.white),)
+                              Text("Favorite",style: TextStyle(color: Colors.white),)
                             ],
                           ),
                           Column(
                             children: [
-                              CircleAvatar(
 
-                                  radius: 20,
-                                  backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
+                              LikeButton(
+                                size: 50,
+                                likeBuilder: (bool isLiked){
+                                  if(coursesFavorite.likeStatus == true){
+                                    return Icon(
+                                        Icons.shopping_cart_outlined,
+                                        color:  Colors.red,
+                                        size :30
+                                    );
+                                  }
+                                  else{
+                                    if(isLiked){
+                                      ApiProductService.LikeCourses(token, id);
+                                      return Icon(
+                                          Icons.shopping_cart_outlined,
+                                          color:  Colors.red,
+                                          size :30
+                                      );
+                                    }
+                                    else{
+                                      return Icon(
+                                          Icons.shopping_cart_outlined,
+                                          color:  Colors.white,
+                                          size :30
+                                      );
+                                    }
+                                    }
+                                  }
+                                ,
+
+
+
                               ),
-                              Text("Subcribe",style: TextStyle(color: Colors.white),)
+                              Text("Buy",style: TextStyle(color: Colors.white),)
                             ],
                           ),
                           Column(
@@ -235,7 +300,7 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
                               scrollDirection: Axis.vertical,
 
 
-                              child :Text(courseDetail.description,
+                              child :Text(courseWithLessons.description,
                                 style: TextStyle(color: Colors.white),)
                           )
                       ),

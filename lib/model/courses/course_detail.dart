@@ -8,22 +8,22 @@ class CourseDetail{
   String subtitle;
   int price;
   String description;
-  List<String> requirement;
-  List<String> learnWhat;
-  int soldNumber;
-  double ratedNumber;
-  int videoNumber;
-  double totalHours;
-  int formalityPoint;
-  int contentPoint;
-  int presentationPoint;
-  String imageUrl;
-  String promoVidUrl;
-  String status;
-  DateTime createdAt;
-  DateTime updatedAt;
-  String instructorId;
-  List<String> categoryIds;
+  // List<String> requirement;
+  // List<String> learnWhat;
+  // int soldNumber;
+  // double ratedNumber;
+  // int videoNumber;
+  // double totalHours;
+  // int formalityPoint;
+  // int contentPoint;
+  // int presentationPoint;
+  // String imageUrl;
+  // String promoVidUrl;
+  // String status;
+  // DateTime createdAt;
+  // DateTime updatedAt;
+  // String instructorId;
+  // List<String> categoryIds;
 
   String userId;
   CourseDetail({

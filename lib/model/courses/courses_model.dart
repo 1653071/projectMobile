@@ -17,8 +17,8 @@ class Courses{
   int videoNumber;
   double totalHours;
   double formalityPoint;
-  int contentPoint;
-  int presentationPoint;
+  double contentPoint;
+  double presentationPoint;
   String imageUrl;
   String promoVidUrl;
   String status;
@@ -68,8 +68,8 @@ class Courses{
       videoNumber:json["videoNumber"],
       totalHours: json["totalHours"].toDouble(),
       formalityPoint: json["formalityPoint"].toDouble() ,
-      contentPoint: json["contentPoint"],
-      presentationPoint: json["presentationPoint"],
+      contentPoint: json["contentPoint"].toDouble(),
+      presentationPoint: json["presentationPoint"].toDouble(),
       imageUrl: json["imageUrl"],
       promoVidUrl: json["promoVidUrl"] == null ? 'no data' : json["promoVidUrl"] as String,
       status: json["status"],
