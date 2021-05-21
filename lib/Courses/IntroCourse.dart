@@ -1,7 +1,11 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_app/api/api_payment.dart';
+import 'package:flutter_app/custom.dart';
+import 'package:flutter_app/model/comment/comment_model.dart';
 import 'package:flutter_app/model/courses/course_detail.dart';
 import 'package:flutter_app/model/courses/course_favorite.dart';
 import 'package:flutter_app/model/courses/course_withlesson.dart';
+import 'package:flutter_app/model/model_payment.dart';
 import 'package:flutter_app/model/teacher/teacher_detail_model.dart';
 import 'package:flutter_app/share_service.dart';
 import 'package:like_button/like_button.dart';
@@ -12,10 +16,16 @@ import 'package:flutter_app/Courses/Home.dart';
 import 'package:flutter_app/api/api_courses.dart';
 import 'package:flutter_app/model/courses/course_detail.dart';
 import 'package:flutter_app/api/api_teacher.dart';
-
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
+import'dart:convert';
+void main() {
+  runApp(IntroCourse(id:"84680304-032c-475a-b2a6-bd6f6efd8035",idInstructor: "92bfd9f0-9425-4d6e-912d-2387218fe330",));
+}
 class IntroCourse extends StatelessWidget {
   String id;
   String idInstructor;
+
   IntroCourse({this.id,this.idInstructor});
   @override
   Widget build(BuildContext context) {
@@ -40,12 +50,42 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
    String id;
    String idInstructor;
    ApiProductService apiProductService= new ApiProductService();
+   ApiPayment apiPayment = new ApiPayment();
    ApiTeacher apiTeacher= new ApiTeacher();
+   PaymentFree pf = new PaymentFree();
+   List<CommentModel> comments;
    TeacherDetail teacherDetail ;
    CourseDetail courseWithLessons;
    StatusFavorite coursesFavorite;
+   bool isOwnUser;
    bool _isLoading =false;
    String token;
+   void _showcontent1(String msg,String msg1) {
+     showDialog(
+       context: context, barrierDismissible: false, // user must tap button!
+       builder: (BuildContext context) {
+         return new AlertDialog(
+           title: new Text(msg),
+           content: new SingleChildScrollView(
+             child: new ListBody(
+               children: [
+                 new Text(msg1),
+               ],
+             ),
+           ),
+           actions: [
+
+             new FlatButton(
+               child: new Text('Cancle'),
+               onPressed: () {
+                 Navigator.of(context).pop();
+               },
+             ),
+           ],
+         );
+       },
+     );
+   }
   _IntroCoursePageState({this.id,this.idInstructor});
 
    @override
@@ -64,9 +104,28 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
      courseWithLessons = await apiProductService.fetchCourseDetail(id);
      coursesFavorite = await apiProductService.StatusFavoriteCourse(id, token);
      teacherDetail = await apiTeacher.fetchTeacherBaseOnCourse(idInstructor);
+     comments = await apiProductService.fetchCommentofCourse(id);
+     pf= await apiPayment.CheckOwnCourse1(token, id);
+       if(pf.isUserOwnCourse==true){
+         isOwnUser= true;
+       }
+       else{
+         isOwnUser= false;
+       }
+
+
      setState(() {
        _isLoading = false;
      });
+   }
+   Future<bool> onLikeButtonTapped(bool isLiked) async{
+     /// send your request here
+     // final bool success= await sendRequest();
+
+     /// if failed, you can do nothing
+     // return success? !isLiked:isLiked;
+
+     return !isLiked;
    }
   @override
   Widget build(BuildContext context) {
@@ -106,7 +165,7 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
 
                     Center(child: Container(
 
-                      child :Image.network(teacherDetail.avatar,
+                      child :Image.network(courseWithLessons.imageUrl,
                         width: 600,
                         height: 240,
                         fit: BoxFit.cover,
@@ -161,10 +220,8 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
                         children: [
                           Container(
                               padding: EdgeInsets.only(left:5),
-                              child:Text("Beginner", style: TextStyle(color: Colors.white),)),
-                          Container(
-                              padding: EdgeInsets.only(left:5),
-                              child:Text("Nov 12 2020", style: TextStyle(color: Colors.white),)),
+                              child:Text(courseWithLessons.price.toString(), style: TextStyle(color: Colors.white),)),
+
                           Container(
                             padding: EdgeInsets.only(left:5),
                             child :SmoothStarRating(
@@ -177,16 +234,13 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
                         ],
                       ),
                     ),
+
+
                     Container(
                       alignment: Alignment.center,
                       margin: EdgeInsets.only(right: 10,left: 10),
                       padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(
-                              color: Colors.grey,
-                              width: 1
-                          ))
-                      ),
+
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -230,21 +284,28 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
                             ],
                           ),
                           Column(
-                            children: [
 
-                              LikeButton(
-                                size: 50,
-                                likeBuilder: (bool isLiked){
-                                  if(coursesFavorite.likeStatus == true){
-                                    return Icon(
-                                        Icons.shopping_cart_outlined,
-                                        color:  Colors.red,
-                                        size :30
-                                    );
+                            children: [
+                              InkWell(
+                                onTap: () async {
+                                  if(isOwnUser==true) {
+                                    _showcontent1("Result", "Already buy a course");
                                   }
                                   else{
-                                    if(isLiked){
-                                      ApiProductService.LikeCourses(token, id);
+                                    var response= await apiPayment.FreeCourse(token, id);
+                                    if(response.statusCode==200){
+                                      _showcontent1("Result", "Buy successful");
+
+                                    }
+                                    else{
+                                      _showcontent1("Result ", "Buy Fail");
+                                    }
+                                  }
+                                },
+                                child: LikeButton(
+                                  size: 50,
+                                  likeBuilder: (bool isLiked) {
+                                    if(isOwnUser== true){
                                       return Icon(
                                           Icons.shopping_cart_outlined,
                                           color:  Colors.red,
@@ -252,132 +313,66 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
                                       );
                                     }
                                     else{
-                                      return Icon(
-                                          Icons.shopping_cart_outlined,
-                                          color:  Colors.white,
-                                          size :30
-                                      );
-                                    }
+                                      if(isLiked) {
+
+                                        return Icon(
+                                            Icons.shopping_cart_outlined,
+                                            color:  Colors.red,
+                                            size :30
+                                        );
+                                      }
+                                      else{
+                                        return Icon(
+                                            Icons.shopping_cart_outlined,
+                                            color:  Colors.white,
+                                            size :30
+                                        );
+                                      }
                                     }
                                   }
-                                ,
+                                  ,
 
 
 
+                                ),
                               ),
                               Text("Buy",style: TextStyle(color: Colors.white),)
                             ],
                           ),
-                          Column(
-                            children: [
-                              CircleAvatar(
 
-                                  radius: 20,
-                                  backgroundImage: NetworkImage('https://via.placeholder.com/140x100')
-                              ),
-                              Text("Subcribe",style: TextStyle(color: Colors.white),)
-                            ],
-                          )
                         ],
                       ),
                     ),
                     Container(
-                      height: 100,
-                      alignment: Alignment.topLeft,
-                      margin: EdgeInsets.only(right: 10,left: 10,top: 10),
-                      padding: EdgeInsets.all(10),
-
-                      decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Colors.grey,
-                                  width: 1
-                              ))
-                      ),
-                      child: Scrollbar(
-
-                          child:SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-
-
-                              child :Text(courseWithLessons.description,
-                                style: TextStyle(color: Colors.white),)
-                          )
-                      ),
-
-                    ),
-                    SizedBox(height: 20),
-                    Container(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        margin: EdgeInsets.only(bottom: 15),
                         child: Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(0),
+                              color: Colors.grey[800].withOpacity(0.5),
                             ),
                             child: Stack(
                                 children: <Widget>[
                                   Padding(
-                                    padding: const EdgeInsets.all(30),
+                                    padding: EdgeInsets.only(left: 10,right: 10,bottom: 20,top :10),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: <Widget>[
-                                        Text("Course Content", style: TextStyle(
-                                          fontSize: 20,
-                                          color: Color(0xFF0D1333),
-                                          fontWeight: FontWeight.bold,
-                                        )),
-                                        SizedBox(height: 30),
                                         Padding(
-                                          padding: const EdgeInsets.only(bottom: 30),
-                                          child: Row(
-                                            children: <Widget>[
-                                              Text(
-                                                "1",
-                                                style: TextStyle(
-                                                  fontSize: 28,
-                                                  color: Colors.green,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              SizedBox(width: 20),
-                                              RichText(
-                                                text: TextSpan(
-                                                  children: [
-                                                    TextSpan(
-                                                      text: "mins",
-                                                      style: TextStyle(
-                                                        color: Color(0xFF0D1333).withOpacity(.5),
-                                                        fontSize: 18,
-                                                      ),
-                                                    ),
-                                                    TextSpan(
-
-                                                      style: TextStyle(
-                                                        fontSize: 18,
-                                                        color: Color(0xFF0D1333),
-                                                        // fontWeight: FontWeight.bold,
-                                                      ).copyWith(
-                                                        fontWeight: FontWeight.w600,
-                                                        height: 1.5,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Spacer(),
-                                              Container(
-                                                margin: EdgeInsets.only(left: 20),
-                                                height: 40,
-                                                width: 40,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Colors.green,
-                                                ),
-                                                child: Icon(Icons.play_arrow, color: Colors.white),
-                                              )
-                                            ],
-                                          ),
-                                        )
+                                          padding: EdgeInsets.only(bottom: 10),
+                                          child: Text("Cost", style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                        ),
+                                        Text(((){
+                                          if(courseWithLessons.price==0){
+                                            return "Free";}
+                                          return courseWithLessons.price.toString() + " VND";
+                                        })(),
+                                          style: TextStyle(color: Colors.white),)
 
 
 
@@ -385,7 +380,239 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
                                     ),
                                   ),
                                 ])
-                        ))
+                        )),
+                    Container(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        margin: EdgeInsets.only(bottom: 15),
+                        child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(0),
+                              color: Colors.grey[800].withOpacity(0.5),
+                            ),
+                            child: Stack(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 10,right: 10,bottom: 20,top :10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.only(bottom: 10),
+                                          child: Text("Requirement", style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                        ),
+                                        Container(
+                                          child: Column(
+                                            children: [
+                                              ListView.builder(
+                                                  shrinkWrap: true,
+                                                  itemCount: courseWithLessons.requirement.length,
+                                                  itemBuilder: (context,index){
+
+                                                    return Text(courseWithLessons.requirement[index],
+                                                      style: TextStyle(color: Colors.white),);
+                                                  }),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ])
+                        )),
+                    Container(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        margin: EdgeInsets.only(bottom: 15),
+                        child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(0),
+                              color: Colors.grey[800].withOpacity(0.5),
+                            ),
+                            child: Stack(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 10,right: 10,bottom: 20,top :10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.only(bottom: 10),
+                                          child: Text("Learn What", style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                        ),
+                                        Container(
+                                          child: Column(
+                                            children: [
+                                              ListView.builder(
+                                                  shrinkWrap: true,
+                                                  itemCount: courseWithLessons.learnWhat.length,
+                                                  itemBuilder: (context,index){
+
+                                                return Text(courseWithLessons.learnWhat[index],
+                                                  style: TextStyle(color: Colors.white),);
+                                              }),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ])
+                        )),
+                    Container(
+                      padding: EdgeInsets.only(left: 20,right: 20),
+                        margin: EdgeInsets.only(bottom: 15),
+                        child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(0),
+                              color: Colors.grey[800].withOpacity(0.5),
+                            ),
+                            child: Stack(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 10,right: 10,bottom: 20,top :10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.only(bottom: 10),
+                                          child: Text("Description", style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                        ),
+                                        Text(courseWithLessons.description,
+                                          style: TextStyle(color: Colors.white),)
+
+
+
+                                      ],
+                                    ),
+                                  ),
+                                ])
+                        )),
+                    GestureDetector(
+
+                      child: Container(
+
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.grey[800].withOpacity(0.5),
+                        ),
+                        margin: EdgeInsets.only(left: 20,right: 20),
+                        padding: const EdgeInsets.only(left: 10,right: 10,top: 10,bottom: 10),
+                        child: Row(
+                          children: <Widget>[
+                            Text(
+                              "Lesson",
+                              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
+                            ),
+                            Spacer(),
+
+                            Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 20),
+                    Container(
+                        child:DropDown(isOwnUser: isOwnUser,)
+                    ),
+                    Container(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        margin: EdgeInsets.only(bottom: 15),
+                        child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(0),
+                              color: Colors.grey[800].withOpacity(0.5),
+                            ),
+                            child: Stack(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 10,right: 10,bottom: 20,top :10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.only(bottom: 10),
+                                          child: Text("Comment", style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                        ),
+                                        Builder(
+                                            builder: (_){
+                                              if(_isLoading){
+                                                return Center(child: CircularProgressIndicator());
+                                              }
+                                              else{
+                                                return Container(
+                                                  child: ListView.builder(
+                                                      scrollDirection: Axis.vertical,
+                                                      shrinkWrap: true,
+                                                      itemCount: comments.length != 0 ? comments.length : 0,
+                                                      itemBuilder: (context,index){
+                                                        return Padding(
+                                                          padding: const EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
+                                                          child: ListTile(
+                                                            leading: GestureDetector(
+                                                              onTap: () async {
+                                                                // Display the image in large form.
+                                                                print("Comment Clicked");
+                                                              },
+                                                              child: Container(
+                                                                height: 50.0,
+                                                                width: 50.0,
+                                                                decoration: new BoxDecoration(
+                                                                    color: Colors.blue,
+                                                                    borderRadius: new BorderRadius.all(Radius.circular(50))),
+                                                                child: CircleAvatar(
+                                                                    radius: 50,
+                                                                    backgroundImage: NetworkImage(comments[index].user.avatar)),
+                                                              ),
+                                                            ),
+                                                            title: Text(
+                                                              comments[index].user.name,
+                                                              style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
+                                                            ),
+                                                            subtitle: Text(comments[index].content,style: TextStyle(color: Colors.white),),
+                                                          ),
+                                                        );
+                                                      }),
+                                                );
+                                              }
+
+                                            }
+                                            ),
+
+
+
+
+
+                                      ],
+                                    ),
+                                  ),
+                                ])
+                        )),
+
+
+
 
 
 

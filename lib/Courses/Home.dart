@@ -407,11 +407,14 @@ class _HomePageState extends State<HomePage> {
                             shrinkWrap: true,
                             itemCount: coursesTrending.length,
                             itemBuilder: (context, index) {
+                              String id =coursesTrending[index].id;
+                              String idInstructor=coursesTrending[index].instructorId;
                               return InkWell(
+
                                   onTap: () {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => IntroCourse(id: coursesTrending[index].id,idInstructor: coursesTrending[index].instructorId)),
+                                      MaterialPageRoute(builder: (context) => IntroCourse(id: id,idInstructor: idInstructor)),
                                     );
                                   },
                                 child: Container(

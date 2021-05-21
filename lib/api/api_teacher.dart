@@ -1,3 +1,4 @@
+import 'package:flutter_app/model/search/search_model.dart';
 import 'package:flutter_app/model/teacher/teacher_detail_model.dart';
 import 'package:flutter_app/model/teacher/teacher_model.dart';
 import 'package:http/http.dart' as http;
@@ -23,5 +24,20 @@ class ApiTeacher{
       var teacher = jsonData["payload"];
       teacherDetail = TeacherDetail.fromJson(teacher);
       return teacherDetail;
+  }
+  Future<List<TeacherData>> fetchTeacherSearch(String keyword) async {
+    final String url = "https://api.letstudy.org/course/search-bar";
+    List<TeacherData> list =[] ;
+    final response = await http.post(Uri.parse(url),
+        body: {"keyword":keyword});
+    var jsonData = json.decode(response.body);
+    var data = jsonData['payload'] ;
+    var teachers = data['instructors'];
+    var  a= teachers['data'] as List;
+
+    for(var teacher in a){
+      list.add(TeacherData.fromJson(teacher));
+    }
+    return list;
   }
 }

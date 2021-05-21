@@ -90,7 +90,7 @@ class _FavoritePageState extends State<FavoritePage> {
             return ListView.builder(
               scrollDirection: Axis.vertical,
                 shrinkWrap: true,
-                itemCount: favoritecourses.length,
+                itemCount: favoritecourses.length ,
                 itemBuilder: (context,index){
                 return InkWell(
                   child: Center(
@@ -125,7 +125,7 @@ class _FavoritePageState extends State<FavoritePage> {
                                               children: <Widget>[
                                                 Text(
                                                   favoritecourses[index].courseTitle,
-                                                  overflow: TextOverflow.clip,
+                                                  overflow: TextOverflow.fade,
                                                   style: TextStyle(
                                                       fontSize: 20,
                                                       color: Colors.white

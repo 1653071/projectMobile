@@ -8,8 +8,8 @@ class CourseDetail{
   String subtitle;
   int price;
   String description;
-  // List<String> requirement;
-  // List<String> learnWhat;
+  List<String> requirement;
+  List<String> learnWhat;
   // int soldNumber;
   // double ratedNumber;
   // int videoNumber;
@@ -17,8 +17,8 @@ class CourseDetail{
   // int formalityPoint;
   // int contentPoint;
   // int presentationPoint;
-  // String imageUrl;
-  // String promoVidUrl;
+  String imageUrl;
+  String promoVidUrl;
   // String status;
   // DateTime createdAt;
   // DateTime updatedAt;
@@ -32,6 +32,10 @@ class CourseDetail{
     this.subtitle,
     this.description,
     this.price,
+    this.requirement,
+    this.learnWhat,
+    this.imageUrl,
+    this.promoVidUrl
 
 
 
@@ -42,7 +46,10 @@ class CourseDetail{
       subtitle: json["subtitle"],
       description: json["description"],
       price:json["price"],
-
+    requirement: List<String>.from(json["requirement"].map((x) => x)),
+    learnWhat: List<String>.from(json["learnWhat"].map((x) => x)),
+    imageUrl: json["imageUrl"],
+    promoVidUrl: json["promoVidUrl"]
 
     );
 

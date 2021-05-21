@@ -69,9 +69,7 @@ class _SignInPageState extends State<SignInPage> {
                 var response = await api.ActivateEmail(email);
                 if(response.statusCode==200)
                 {
-                  var jsonData = jsonDecode(response.body);
-                  String token = jsonData["token"];
-                  print(token);
+
                 }
                 else{
 
