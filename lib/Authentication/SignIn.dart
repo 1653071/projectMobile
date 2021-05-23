@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Authentication/ForgetPassword.dart';
-import 'package:flutter_app/api/api_login.dart';
+import 'package:flutter_app/api/api_user.dart';
 import 'package:flutter_app/Courses/Home.dart';
 import 'package:flutter_app/model/login_model.dart';
 import 'package:flutter_app/share_service.dart';
@@ -66,14 +66,12 @@ class _SignInPageState extends State<SignInPage> {
               onPressed: () async {
                 String email=emailController.text;
                 ApiService api = new ApiService();
-                var response = await api.ActivateEmail(email);
-                if(response.statusCode==200)
-                {
+                http.Response response = await api.ActivateEmail(email);
+                var jsonData = jsonDecode(response.body);
+                String token = jsonData["access_token"].toString();
+                print(token);
 
-                }
-                else{
 
-                }
                 // ignore: unrelated_type_equality_checks
 
 
@@ -123,7 +121,18 @@ class _SignInPageState extends State<SignInPage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Center(child: Text(widget.title,textAlign: TextAlign.center,)),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            InkWell(onTap: () {
+
+              Navigator.of(context).pop();
+            },
+              child: Text("Back", textAlign: TextAlign.center,),),
+            Text(widget.title, textAlign: TextAlign.center,),
+            SizedBox(width: 50,)
+          ],
+        ),
         backgroundColor: Colors.grey[800],
 
       ),

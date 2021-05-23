@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_app/api/api_courses.dart';
+import 'package:flutter_app/model/courses/courses_model.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Courses/IntroCourse.dart';
@@ -7,6 +9,9 @@ void main() {
   runApp(New());
 }
 class New extends StatelessWidget {
+  String title ;
+  List<Courses> courses;
+  New({this.title,this.courses});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -14,17 +19,43 @@ class New extends StatelessWidget {
           appBarTheme: AppBarTheme(
             color: Colors.grey[800],
           )),
-      home: NewPage(),
+      home: NewPage(title: title,courses: courses,),
     );
   }
 }
 
 class NewPage extends StatefulWidget {
+  String title;
+  List<Courses> courses;
+  NewPage({Key key, this.title,this.courses}) : super(key: key);
   @override
-  _NewPageState createState() => _NewPageState();
+  _NewPageState createState() => _NewPageState(courses: courses);
 }
 
 class _NewPageState extends State<NewPage> {
+  ApiProductService apiProductService = new ApiProductService();
+  List<Courses> courses;
+  bool _isLoading;
+  _NewPageState({Key key,this.courses}) ;
+  @override
+  void initState() {
+    _fetchNotes();
+
+
+    super.initState();
+  }
+
+  _fetchNotes() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +67,7 @@ class _NewPageState extends State<NewPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Home", textAlign: TextAlign.center,),
-              Text("New", textAlign: TextAlign.center,),
+              Text(widget.title, textAlign: TextAlign.center,),
               InkWell(onTap: () {
                 Navigator.push(
                   context,
@@ -49,665 +80,101 @@ class _NewPageState extends State<NewPage> {
 
 
       ),
-      body: Center(
-          child: ListView(
-            padding: const EdgeInsets.all(8),
-
-            children: <Widget>[
-              Card(
-                color: Colors.black54,
-                elevation: 5,
-                child: Container(
-                  margin: EdgeInsets.all(10),
-                  height: 100.0,
-                  child: Row(
-                    children: <Widget>[
-                      Container(
+      body: Builder(
+        builder: (_){
+          if(_isLoading){
+            return Center(child: CircularProgressIndicator());
+          }
+          return ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: courses.length ,
+              itemBuilder: (context,index){
+                return InkWell(
+                  child: Center(
+                    child :Card(
+                      color: Colors.black54,
+                      elevation: 5,
+                      child: Container(
                         height: 100.0,
-                        width: 70.0,
-                        decoration: BoxDecoration(
-
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(5),
-                        topLeft: Radius.circular(5)
-                    ),
-
-                ),
-                  child: InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => IntroCourse()),
-                        );
-                      },
-                      child: Ink.image(
-                          fit: BoxFit.cover,
-                          image: NetworkImage(
-                            "https://miro.medium.com/max/3356/1*-6WdIcd88w3pfphHOYln3Q.png",
-                          )
-                      )
-                  ),
-              ),
-                  Container(
-                    height: 100,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(10, 2, 0, 0),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        width: 500,
+                        child: Row(
                           children: <Widget>[
-                            InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => IntroCourse()),
-                                  );
-                                  },
-                                child:Text(
-                                  "Build app with flutetr",
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      color: Colors.white
+                            Container(
+                              height: 100.0,
+                              width: 70.0,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(5),
+                                      topLeft: Radius.circular(5)
                                   ),
-                                )
-                            ),
-                            Padding(
-                              padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                child: Text("CopyHouse",textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey
-                                ),),
-
-                            ),
-                            Padding(
-                              padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                              child: Text("CopyHouse",textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey
-                                ),),
-
+                                  image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(courses[index].imageUrl)
+                                  )
+                              ),
                             ),
                             Container(
-                              padding: EdgeInsets.only(top:5),
-                              child :SmoothStarRating(
-                                rating: 5,
-                                size: 20,
-                                starCount: 5,
-                                color: Colors.yellow,
-                              ),)
-                          ]
+                              height: 100,
+                              width: 300,
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(10, 2, 0, 0),
+                                child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Flexible(child: Text(
+                                        courses[index].title,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.white
+                                        ),
+                                      ),),
+                                      Padding(
+                                        padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
+
+                                        child: Text(courses[index].instructorName,textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.grey
+                                          ),),
+
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
+
+                                        child: Text(courses[index].price.toString(),textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.grey
+                                          ),),
+
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.only(left: 10),
+                                        alignment: Alignment.bottomLeft,
+                                        child :SmoothStarRating(
+                                          rating: courses[index].ratedNumber,
+                                          size: 20,
+                                          starCount: 5,
+                                          isReadOnly: true,
+                                          color: Colors.yellow,
+                                        ),)
+                                    ]
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                  )
-              ],
-              ),
-            ),
-              ),
-              Card(
 
-                color: Colors.black54,
-                elevation: 5,
-                child: Container(
-                  margin: EdgeInsets.all(10),
-                  height: 100.0,
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        height: 100.0,
-                        width: 70.0,
-                        decoration: BoxDecoration(
 
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(5),
-                              topLeft: Radius.circular(5)
-                          ),
-
-                        ),
-                        child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => IntroCourse()),
-                              );
-                            },
-                            child: Ink.image(
-                                fit: BoxFit.cover,
-                                image: NetworkImage(
-                                  "https://miro.medium.com/max/3356/1*-6WdIcd88w3pfphHOYln3Q.png",
-                                )
-                            )
-                        ),
-                      ),
-                      Container(
-                        height: 100,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(10, 2, 0, 0),
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => IntroCourse()),
-                                      );
-                                    },
-                                    child:Text(
-                                      "Build app with flutetr",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.white
-                                      ),
-                                    )
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(top:5),
-                                  child :SmoothStarRating(
-                                    rating: 5,
-                                    size: 20,
-                                    starCount: 5,
-                                    color: Colors.yellow,
-                                  ),)
-                              ]
-                          ),
-                        ),
-                      )
-                    ],
                   ),
-                ),
-              ),
-              Card(
-
-                color: Colors.black54,
-                elevation: 5,
-                child: Container(
-                  margin: EdgeInsets.all(10),
-                  height: 100.0,
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        height: 100.0,
-                        width: 70.0,
-                        decoration: BoxDecoration(
-
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(5),
-                              topLeft: Radius.circular(5)
-                          ),
-
-                        ),
-                        child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => IntroCourse()),
-                              );
-                            },
-                            child: Ink.image(
-                                fit: BoxFit.cover,
-                                image: NetworkImage(
-                                  "https://miro.medium.com/max/3356/1*-6WdIcd88w3pfphHOYln3Q.png",
-                                )
-                            )
-                        ),
-                      ),
-                      Container(
-                        height: 100,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(10, 2, 0, 0),
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => IntroCourse()),
-                                      );
-                                    },
-                                    child:Text(
-                                      "Build app with flutetr",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.white
-                                      ),
-                                    )
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(top:5),
-                                  child :SmoothStarRating(
-                                    rating: 5,
-                                    size: 20,
-                                    starCount: 5,
-                                    color: Colors.yellow,
-                                  ),)
-                              ]
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Card(
-
-                color: Colors.black54,
-                elevation: 5,
-                child: Container(
-                  margin: EdgeInsets.all(10),
-                  height: 100.0,
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        height: 100.0,
-                        width: 70.0,
-                        decoration: BoxDecoration(
-
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(5),
-                              topLeft: Radius.circular(5)
-                          ),
-
-                        ),
-                        child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => IntroCourse()),
-                              );
-                            },
-                            child: Ink.image(
-                                fit: BoxFit.cover,
-                                image: NetworkImage(
-                                  "https://miro.medium.com/max/3356/1*-6WdIcd88w3pfphHOYln3Q.png",
-                                )
-                            )
-                        ),
-                      ),
-                      Container(
-                        height: 100,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(10, 2, 0, 0),
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => IntroCourse()),
-                                      );
-                                    },
-                                    child:Text(
-                                      "Build app with flutetr",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.white
-                                      ),
-                                    )
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(top:5),
-                                  child :SmoothStarRating(
-                                    rating: 5,
-                                    size: 20,
-                                    starCount: 5,
-                                    color: Colors.yellow,
-                                  ),)
-                              ]
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Card(
-
-                color: Colors.black54,
-                elevation: 5,
-                child: Container(
-                  margin: EdgeInsets.all(10),
-                  height: 100.0,
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        height: 100.0,
-                        width: 70.0,
-                        decoration: BoxDecoration(
-
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(5),
-                              topLeft: Radius.circular(5)
-                          ),
-
-                        ),
-                        child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => IntroCourse()),
-                              );
-                            },
-                            child: Ink.image(
-                                fit: BoxFit.cover,
-                                image: NetworkImage(
-                                  "https://miro.medium.com/max/3356/1*-6WdIcd88w3pfphHOYln3Q.png",
-                                )
-                            )
-                        ),
-                      ),
-                      Container(
-                        height: 100,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(10, 2, 0, 0),
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => IntroCourse()),
-                                      );
-                                    },
-                                    child:Text(
-                                      "Build app with flutetr",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.white
-                                      ),
-                                    )
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(top:5),
-                                  child :SmoothStarRating(
-                                    rating: 5,
-                                    size: 20,
-                                    starCount: 5,
-                                    color: Colors.yellow,
-                                  ),)
-                              ]
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Card(
-
-                color: Colors.black54,
-                elevation: 5,
-                child: Container(
-                  margin: EdgeInsets.all(10),
-                  height: 100.0,
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        height: 100.0,
-                        width: 70.0,
-                        decoration: BoxDecoration(
-
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(5),
-                              topLeft: Radius.circular(5)
-                          ),
-
-                        ),
-                        child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => IntroCourse()),
-                              );
-                            },
-                            child: Ink.image(
-                                fit: BoxFit.cover,
-                                image: NetworkImage(
-                                  "https://miro.medium.com/max/3356/1*-6WdIcd88w3pfphHOYln3Q.png",
-                                )
-                            )
-                        ),
-                      ),
-                      Container(
-                        height: 100,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(10, 2, 0, 0),
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => IntroCourse()),
-                                      );
-                                    },
-                                    child:Text(
-                                      "Build app with flutetr",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.white
-                                      ),
-                                    )
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(top:5),
-                                  child :SmoothStarRating(
-                                    rating: 5,
-                                    size: 20,
-                                    starCount: 5,
-                                    color: Colors.yellow,
-                                  ),)
-                              ]
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Card(
-
-                color: Colors.black54,
-                elevation: 5,
-                child: Container(
-                  margin: EdgeInsets.all(10),
-                  height: 100.0,
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        height: 100.0,
-                        width: 70.0,
-                        decoration: BoxDecoration(
-
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(5),
-                              topLeft: Radius.circular(5)
-                          ),
-
-                        ),
-                        child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => IntroCourse()),
-                              );
-                            },
-                            child: Ink.image(
-                                fit: BoxFit.cover,
-                                image: NetworkImage(
-                                  "https://miro.medium.com/max/3356/1*-6WdIcd88w3pfphHOYln3Q.png",
-                                )
-                            )
-                        ),
-                      ),
-                      Container(
-                        height: 100,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(10, 2, 0, 0),
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => IntroCourse()),
-                                      );
-                                    },
-                                    child:Text(
-                                      "Build app with flutetr",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.white
-                                      ),
-                                    )
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 3, 0, 3),
-
-                                  child: Text("CopyHouse",textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey
-                                    ),),
-
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(top:5),
-                                  child :SmoothStarRating(
-                                    rating: 5,
-                                    size: 20,
-                                    starCount: 5,
-                                    color: Colors.yellow,
-                                  ),)
-                              ]
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-
-            ],
-          )
-      ),
+                );
+              });
+        },
+      )
     );
   }
 }

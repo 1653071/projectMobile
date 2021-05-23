@@ -11,7 +11,7 @@ class CourseDetail{
   List<String> requirement;
   List<String> learnWhat;
   // int soldNumber;
-  // double ratedNumber;
+  double ratedNumber;
   // int videoNumber;
   // double totalHours;
   // int formalityPoint;
@@ -22,7 +22,7 @@ class CourseDetail{
   // String status;
   // DateTime createdAt;
   // DateTime updatedAt;
-  // String instructorId;
+  String instructorId;
   // List<String> categoryIds;
 
   String userId;
@@ -34,8 +34,10 @@ class CourseDetail{
     this.price,
     this.requirement,
     this.learnWhat,
+    this.ratedNumber,
     this.imageUrl,
-    this.promoVidUrl
+    this.promoVidUrl,
+    this.instructorId
 
 
 
@@ -48,8 +50,11 @@ class CourseDetail{
       price:json["price"],
     requirement: List<String>.from(json["requirement"].map((x) => x)),
     learnWhat: List<String>.from(json["learnWhat"].map((x) => x)),
+    ratedNumber: json["ratedNumber"].toDouble(),
     imageUrl: json["imageUrl"],
-    promoVidUrl: json["promoVidUrl"]
+    promoVidUrl: json["promoVidUrl"],
+    instructorId: json["instructorId"]
+
 
     );
 

@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'package:flutter_app/model/courses/course_detail.dart';
 class CourseWithLessons {
   String id;
   String title;
@@ -11,9 +13,9 @@ class CourseWithLessons {
   int ratedNumber;
   int videoNumber;
   double totalHours;
-  int formalityPoint;
-  int contentPoint;
-  int presentationPoint;
+  double formalityPoint;
+  double contentPoint;
+  double presentationPoint;
   String imageUrl;
   String promoVidUrl;
   String status;
@@ -23,6 +25,7 @@ class CourseWithLessons {
   String instructorName;
   String userId;
   List<Section> section;
+  List<CourseDetail> coursesLikeCategory;
   CourseWithLessons({
   this.id,
   this.title,
@@ -45,6 +48,8 @@ class CourseWithLessons {
   this.instructorId,
   this.instructorName,
   this.userId,
+    this.section,
+    this.coursesLikeCategory
 
   });
 
@@ -60,9 +65,9 @@ class CourseWithLessons {
       ratedNumber: json["ratedNumber"],
       videoNumber: json["videoNumber"],
       totalHours: json["totalHours"].toDouble(),
-      formalityPoint: json["formalityPoint"],
-      contentPoint: json["contentPoint"],
-      presentationPoint: json["presentationPoint"],
+      formalityPoint: json["formalityPoint"].toDouble(),
+      contentPoint: json["contentPoint"].toDouble(),
+      presentationPoint: json["presentationPoint"].toDouble(),
       imageUrl: json["imageUrl"],
       promoVidUrl: json["promoVidUrl"] == null ? 'no data' : json["promoVidUrl"] as String,
       status: json["status"],
@@ -71,7 +76,8 @@ class CourseWithLessons {
       instructorId: json["instructorId"],
       instructorName: json["instructorName"],
       userId: json["userId"],
-
+      section: List<Section>.from(json["section"].map((x) => Section.fromJson(x))),
+        coursesLikeCategory: List<CourseDetail>.from(json["coursesLikeCategory"].map((x)=>CourseDetail.fromJson(x)))
     );
   }
   Map<String, dynamic> toJson() => {
@@ -132,6 +138,7 @@ class CourseWithLessons {
   updatedAt: DateTime.parse(json["updatedAt"]),
   lesson: List<Lesson>.from(json["lesson"].map((x) => Lesson.fromJson(x))),
   sumHours: json["sumHours"].toDouble(),
+
   sumLessonFinish: json["sumLessonFinish"],
   );
   Map<String, dynamic> toJson() => {
@@ -158,7 +165,7 @@ class CourseWithLessons {
   this.hours,
   this.sectionId,
   this.isFinish,
-  this.resource,
+
   });
   String id;
   int numberOrder;
@@ -180,7 +187,7 @@ class CourseWithLessons {
   hours: json["hours"].toDouble(),
   sectionId: json["sectionId"],
   isFinish: json["isFinish"] == null ? false : true, // --------------------Chỗ này trc đó database bị null------------------
-  resource: List<dynamic>.from(json["resource"].map((x) => x)),
+
   );
   Map<String, dynamic> toJson() => {
   "id": id,
@@ -192,6 +199,6 @@ class CourseWithLessons {
   "hours": hours,
   "sectionId": sectionId,
   "isFinish": isFinish,
-  "resource": List<dynamic>.from(resource.map((x) => x)),
+
   };
   }

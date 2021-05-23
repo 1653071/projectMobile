@@ -13,7 +13,7 @@ class TeacherDetail{
   DateTime createAt;
   DateTime updateAt;
   int totalCourse;
-  int averagePoint;
+  double averagePoint;
   int countRating;
   int ratedNumber;
   int soldNumber;
@@ -33,7 +33,7 @@ class TeacherDetail{
       createAt: DateTime.parse(json["createdAt"]),
       updateAt: DateTime.parse(json["updatedAt"]),
       totalCourse: json["totalCourse"],
-      averagePoint: json["averagePoint"],
+      averagePoint: json["averagePoint"].toDouble(),
       countRating: json["countRating"],
       ratedNumber: json["ratedNumber"],
       soldNumber: json["soldNumber"]

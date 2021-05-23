@@ -26,6 +26,9 @@ dependencies:
     sdk: flutter
   shared_preferences: ^0.5.10
   syncfusion_flutter_datagrid: ^18.4.30-beta
+  comment_box: ^0.0.16
+  youtube_player_flutter: ^8.0.0
+  video_player: ^0.5.1
 
 
   # The following adds the Cupertino Icons font to your application.

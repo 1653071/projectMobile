@@ -2,13 +2,13 @@ import 'package:flutter_app/model/model_payment.dart';
 import 'package:http/http.dart' as http;
 import'dart:convert';
 class ApiPayment{
-  Future<http.Response> FreeCourse(String token , String courseId) async{
+  static Future<void> FreeCourse(String token , String courseId) async{
     final url ="https://api.letstudy.org/payment/get-free-courses";
     final response=await http.post(Uri.parse(url),headers: {
       'Accept': 'application/json',
       'Authorization': 'Bearer $token',
     },body: {"courseId": courseId});
-    return response;
+
 
   }
   Future<http.Response> CheckOwnCourse(String token,String courseId)async{

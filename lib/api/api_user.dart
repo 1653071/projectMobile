@@ -20,6 +20,13 @@ class ApiService{
 
 
   }
+  Future<http.Response> ForgotPassword(String email) async {
+    String url= "https://api.letstudy.org/user/forget-pass/send-email";
+    final response =await http.post(Uri.parse(url),
+        body:{'email':email}
+    );
+    return response;
+  }
   Future LoginUser(String email,String password) async{
     String url = "https://api.letstudy.org/user/login";
     final response = await http.post(Uri.parse("https://api.letstudy.org/user/login"),
@@ -34,6 +41,13 @@ class ApiService{
     int a;
     final response = await http.post(Uri.parse(url),
         body:{'email':email}
+    );
+    return response;
+  }
+  Future<http.Response> Activate(String token) async{
+    String url="https://api.letstudy.org/user/activate-email";
+    final response = await http.put(Uri.parse(url),
+        body:{'token':token}
     );
     return response;
   }
@@ -59,6 +73,21 @@ class ApiService{
 
     );
     return response;
+
+  }
+  Future<User> updateInfo(String token,String name , String avatar,String phone) async {
+    String url ="https://api.letstudy.org/user/update-profile";
+    User user;
+    final response = await http.put(Uri.parse(url),headers: {
+      'Authorization': 'Bearer $token',
+    },body: {"name": name,
+      "avatar": avatar,
+      "phone": phone});
+    var jsonData = json.decode(response.body);
+    var userData = jsonData["payload"];
+    user = User.fromJson(userData);
+    return user;
+
 
   }
 

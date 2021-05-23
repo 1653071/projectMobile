@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/Authentication/ChangePassword.dart';
 import 'package:flutter_app/Authentication/SignIn.dart';
 import 'package:flutter_app/Courses/Favorite.dart';
-import 'package:flutter_app/api/api_login.dart';
+import 'package:flutter_app/api/api_user.dart';
 import 'package:flutter_app/model/courses/course_withlesson.dart';
 import 'package:flutter_app/model/user/user_model.dart';
 import 'package:flutter_app/share_service.dart';
@@ -44,7 +44,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 List<String> choices = <String>[
-  'Information',
+  'Account',
   'Favorite',
   'Settings',
   'ChangePassword',
@@ -55,6 +55,7 @@ class _HomePageState extends State<HomePage> {
  ApiTeacher apiTeacher= new ApiTeacher();
  ApiCategoryService apiCategoryService = new ApiCategoryService();
  ApiService apiService = new ApiService();
+ List<CoursesSuggestion> coursesSuggestion;
   List<Courses> courses;
   List<Courses> coursesTrending;
   List<Teacher> teachers;
@@ -76,14 +77,15 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _isLoading = true;
     });
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    token = pref.getString("token");
+    user = await apiService.getUserInfo(token);
+    print(user.id);
     teachers = await apiTeacher.fetchTeacher();
     courses = await apiProductService.fetchCourses();
     coursesTrending=await apiProductService.fetchTrendingCourses();
     categories = await apiCategoryService.fetchCategory();
-
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    token = pref.getString("token");
-    user = await apiService.getUserInfo(token);
+    coursesSuggestion = await apiProductService.fetchCourseSuggestions(user.id);
     print(user.id);
     setState(() {
       _isLoading = false;
@@ -188,6 +190,11 @@ class _HomePageState extends State<HomePage> {
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
+          Container(
+            alignment: Alignment.centerLeft,
+            padding: EdgeInsets.only(left:10,bottom:10,top: 10,right: 10),
+            child:Text("Categories",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white)),
+          ),
               Builder(
                   builder: (_) {
                     if (_isLoading) {
@@ -195,8 +202,8 @@ class _HomePageState extends State<HomePage> {
                     }
                     return Container(
                         height: 30,
-                       child: Padding(
-                         padding: const EdgeInsets.only(left: 10.0),
+                       child: Container(
+
                          child:ListView.builder(
 
                              scrollDirection: Axis.horizontal,
@@ -246,7 +253,7 @@ class _HomePageState extends State<HomePage> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => New()),
+                                MaterialPageRoute(builder: (context) => New(title: "New",courses: courses,)),
                               );
                             },
                             style: ButtonStyle(
@@ -294,7 +301,7 @@ class _HomePageState extends State<HomePage> {
                                   );
                                 },
                                 child: Container(
-                                  margin: EdgeInsets.only(left: 20),
+                                  margin: EdgeInsets.only(left: 10),
                                   width: 250,
                                   decoration: BoxDecoration(
                                     color: Colors.grey[800],
@@ -329,25 +336,41 @@ class _HomePageState extends State<HomePage> {
                                               )
                                           ),
 
-                                          ListTile(
+                                          Container(height: 100,
+                                          child: ListTile(
 
-                                            title: Text(courses[index].title,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20)),
+                                              title: Text(
 
-                                            subtitle: Text(
-                                              courses[index].subtitle,
-                                              style: TextStyle(color: Colors.white.withOpacity(0.6)),
-                                            ),
+                                                    courses[index].title,
+                                                    style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20),
+                                                    overflow: TextOverflow.ellipsis,
+                                                    maxLines: 2,
+
+                                                  ),
+
+
+                                              subtitle: Text(
+                                                      courses[index].instructorName,
+                                                      style: TextStyle(color: Colors.white.withOpacity(0.6),),
+                                                      overflow: TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                    ),
+
+                                              )
                                           ),
-                                          Container(
-                                            padding: EdgeInsets.only(left: 10),
-                                            alignment: Alignment.bottomLeft,
-                                            child :SmoothStarRating(
-                                              rating: courses[index].ratedNumber,
-                                              size: 20,
-                                              starCount: 5,
-                                              isReadOnly: true,
-                                              color: Colors.yellow,
-                                            ),)
+
+                                     Container(
+
+                                      padding: EdgeInsets.only(top:10,left: 10),
+                                      child :SmoothStarRating(
+                                        rating: courses[index].ratedNumber,
+                                        size: 20,
+                                        starCount: 5,
+                                        isReadOnly: true,
+                                        color: Colors.yellow,
+
+                                      )
+                                  )
 
                                         ]
                                     ),
@@ -371,6 +394,12 @@ class _HomePageState extends State<HomePage> {
                         width: 80,
                         height: 30,
                         child: TextButton(
+                          onPressed: () {
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => New(title: "Trending",courses: coursesTrending,)),
+                    );
+                    },
 
                             style: ButtonStyle(
                                 backgroundColor: MaterialStateProperty.all<Color>(Colors.grey[800]),
@@ -418,7 +447,7 @@ class _HomePageState extends State<HomePage> {
                                     );
                                   },
                                 child: Container(
-                                  margin: EdgeInsets.only(left: 20),
+                                  margin: EdgeInsets.only(left: 10),
                                   width: 250,
                                   decoration: BoxDecoration(
                                     color: Colors.grey[800],
@@ -455,30 +484,180 @@ class _HomePageState extends State<HomePage> {
                                               )
                                           ),
 
-                                          ListTile(
+                                          Container(
+                                              height: 100,
+                                              padding: EdgeInsets.only(top:10),
+                                              child: ListTile(
+                                                title: Text(coursesTrending[index].title,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20),
+                                                    overflow: TextOverflow.ellipsis,
+                                                    maxLines: 2,),
 
-                                            title: Text(coursesTrending[index].title,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20)),
 
-                                            subtitle: Text(
-                                              coursesTrending[index].subtitle,
-                                              style: TextStyle(color: Colors.white.withOpacity(0.6)),
-                                            ),
+                                              subtitle: Text(
+                                                      coursesTrending[index].instructorName,
+                                                      style: TextStyle(color: Colors.white.withOpacity(0.6),
+                                                      ),
+                                                      overflow: TextOverflow.ellipsis,
+                                                      maxLines: 1,
+                                                    ),
+
+
+                                              )
                                           ),
                                           Container(
-                                            padding: EdgeInsets.only(left: 10),
-                                            alignment: Alignment.bottomLeft,
-                                            child :SmoothStarRating(
-                                              rating: coursesTrending[index].ratedNumber,
-                                              size: 20,
-                                              starCount: 5,
-                                              isReadOnly: true,
-                                              color: Colors.yellow,
-                                            ),)
+                                              alignment: Alignment.bottomLeft,
+                                              child: Container(
+
+                                                padding: EdgeInsets.only(left: 10,top: 10),
+
+                                                child :SmoothStarRating(
+
+                                                  rating: coursesTrending[index].ratedNumber,
+                                                  size: 20,
+                                                  starCount: 5,
+                                                  isReadOnly: true,
+                                                  color: Colors.yellow,
+                                                ),)
+                                          )
 
                                         ]
                                     ),
                                   ),
                                 )
+                              );
+                            }
+                        )
+                    );
+                  }
+              ),
+              Container(
+
+                padding: EdgeInsets.only(left:5,top :10,bottom: 10,right: 5),
+                child :Row(
+
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text("Courses Suggestion",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white)),
+                    Container(
+                        width: 80,
+                        height: 30,
+                        child: TextButton(
+
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(Colors.grey[800]),
+                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25.0),
+
+                                    )
+                                )
+                            ),
+                            child:Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text("See all",style: TextStyle(color: Colors.white,fontSize: 12),),
+                                Icon(Icons.double_arrow_outlined,size: 10,color: Colors.white,)
+                              ],
+                            ))
+                    )
+
+
+                  ],
+                ),
+
+              ),
+              Builder(
+                  builder: (_) {
+                    if (_isLoading) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    return Container(
+                        height: 300,
+                        child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            shrinkWrap: true,
+                            itemCount: coursesSuggestion.length,
+                            itemBuilder: (context, index) {
+                              String id =coursesSuggestion[index].id;
+                              String idInstructor=coursesSuggestion[index].instructorId;
+                              return InkWell(
+
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => IntroCourse(id: id,idInstructor: idInstructor)),
+                                    );
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.only(left: 10),
+                                    width: 250,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[800],
+
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.white.withOpacity(0.2),
+                                          spreadRadius: 5,
+                                          blurRadius: 7,
+                                          offset: Offset(0, 3), // changes position of shadow
+                                        ),
+                                      ],
+
+                                    ),
+                                    child :Card(
+                                      color:Colors.grey[800],
+                                      child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          children:[
+                                            InkWell(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(builder: (context) => IntroCourse(id: coursesTrending[index].id,idInstructor: coursesTrending[index].instructorId,)),
+                                                  );
+                                                },
+                                                child: Ink.image(
+                                                    height: 150,
+                                                    fit: BoxFit.cover,
+                                                    image: NetworkImage(
+                                                      coursesSuggestion[index].imageUrl,
+
+                                                    )
+                                                )
+                                            ),
+
+                                            Container(
+                                              height: 100,
+                                              padding: EdgeInsets.only(top: 10),
+                                              child: ListTile(
+
+                                                title:  Text(coursesSuggestion[index].title,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20),
+                                                        overflow: TextOverflow.ellipsis,
+                                                        maxLines: 2,),
+                                                  subtitle:Text(
+                                                          coursesSuggestion[index].subtitle,
+                                                          style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                                                          overflow: TextOverflow.ellipsis,
+                                                          maxLines: 1
+                                                      ),
+
+                                                )
+                                            ),
+                                            Container(
+                                              padding: EdgeInsets.only(left: 10,top: 10),
+                                              alignment: Alignment.bottomLeft,
+                                              child :SmoothStarRating(
+                                                rating: coursesSuggestion[index].ratedNumber,
+                                                size: 20,
+                                                starCount: 5,
+                                                isReadOnly: true,
+                                                color: Colors.yellow,
+                                              ),)
+
+                                          ]
+                                      ),
+                                    ),
+                                  )
                               );
                             }
                         )

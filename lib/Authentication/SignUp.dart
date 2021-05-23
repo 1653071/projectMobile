@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Authentication/ForgetPassword.dart';
 import 'package:flutter_app/Authentication/main.dart';
-import 'package:flutter_app/api/api_login.dart';
+import 'package:flutter_app/api/api_user.dart';
 import 'package:flutter_app/Authentication/SignIn.dart';
 
 import 'package:flutter_app/model/register_model.dart';
@@ -244,7 +244,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                                 else
                                   {
-                                    _showcontent();
+
 
                                   }
                               }

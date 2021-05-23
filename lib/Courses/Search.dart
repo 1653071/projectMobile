@@ -89,21 +89,46 @@ class _SearchPageState extends State<SearchPage> {
         body:SingleChildScrollView(
               child: Column(
                 children: [
-                  TextField(
-                    controller: dataController,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                        icon: IconButton(
-                          icon:Icon(Icons.search),
-                          color: Colors.white,
-                          onPressed: () {
+                  Row(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width*0.75,
+                        child:TextField(
+                          controller: dataController,
+                          style: TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                              icon: IconButton(
+                                icon:Icon(Icons.search),
+                                color: Colors.white,
+                                onPressed: () {
+                                  _fetchNotes();
 
-                            _fetchNotes();
-
-                          },
+                                },
+                              ),
+                              hintText: "Search Here",
+                              hintStyle: TextStyle(color: Colors.white)),
                         ),
-                        hintText: "Search Here",
-                        hintStyle: TextStyle(color: Colors.white)),
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width*0.25,
+                        child: TextButton(
+                            onPressed: () {
+
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+
+                            ),
+                            child:Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text("History",style: TextStyle(color: Colors.white,fontSize: 16),),
+
+                              ],
+                            )
+                        ),
+                      ),
+                    ],
                   ),
                   Container(
                     margin: EdgeInsets.only(bottom: 20,top: 10),
