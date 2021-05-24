@@ -125,8 +125,10 @@ class _SignInPageState extends State<SignInPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             InkWell(onTap: () {
-
-              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SignIn()),
+              );
             },
               child: Text("Back", textAlign: TextAlign.center,),),
             Text(widget.title, textAlign: TextAlign.center,),

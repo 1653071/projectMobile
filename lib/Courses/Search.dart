@@ -250,7 +250,7 @@ class _SearchPageState extends State<SearchPage> {
                               itemBuilder: (context,index){
                                 return InkWell(
                                   child: CourseSearch(image:list[index].imageUrl,title: list[index].title,name: list[index].name,
-                                    price: list[index].price,),
+                                    price: list[index].price,id: list[index].id,),
                                 );
                               });
                         }
@@ -291,7 +291,7 @@ class _SearchPageState extends State<SearchPage> {
                                   itemBuilder: (context,index){
                                     return InkWell(
                                         child: CourseSearch(image:list[index].imageUrl,title: list[index].title,name: list[index].name,
-                                          price: list[index].price,)
+                                          price: list[index].price,id: list[index].id)
                                     );
                                   }),
                             ],

@@ -3,6 +3,11 @@ import 'package:flutter_app/api/api_courses.dart';
 import 'package:flutter_app/model/video/videoModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+
+import 'package:dio/dio.dart';
 void main() {
   runApp(Home());
 }
@@ -42,6 +47,9 @@ class _VideoScreenState extends State<VideoScreen> {
   String videoId ;
   String token;
   bool isloading ;
+  var imgUrl ;
+  bool downloading = false;
+  var progressString = "";
   void _showcontent1(String msg,String msg1) {
     showDialog(
       context: context, barrierDismissible: false, // user must tap button!
@@ -165,7 +173,34 @@ class _VideoScreenState extends State<VideoScreen> {
 
                   padding: EdgeInsets.only(left:10,bottom:10,top: 10,right: 10),
                   child:TextButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        imgUrl= url.videoUrl;
+                        Dio dio = Dio();
+
+                        try {
+                          var dir = await getApplicationDocumentsDirectory();
+                          print("path ${dir.path}");
+                          await dio.download(imgUrl, "${dir.path}/demo.mp4",
+                              onReceiveProgress: (rec, total) {
+                                print("Rec: $rec , Total: $total");
+
+                                setState(() {
+                                  downloading = true;
+                                  progressString = ((rec / total) * 100).toStringAsFixed(0) + "%";
+                                });
+                              });
+                        } catch (e) {
+                          print(e);
+                        }
+
+                        setState(() {
+                          downloading = false;
+                          progressString = "Completed";
+                        });
+                        print("Download completed");
+
+
+                        // Get the video manifest.
 
                       },
                       style: ButtonStyle(

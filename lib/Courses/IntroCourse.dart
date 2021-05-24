@@ -235,10 +235,12 @@ class _IntroCoursePageState extends State<IntroCoursePage> {
                           Container(
                             padding: EdgeInsets.only(left:5),
                             child :SmoothStarRating(
-                              rating: 5,
+                              rating: courseWithLessons.ratedNumber.toDouble(),
                               size: 20,
                               starCount: 5,
                               color: Colors.yellow,
+                              isReadOnly:true,
+                              
                             ),
                           )
                         ],

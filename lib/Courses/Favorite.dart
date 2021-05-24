@@ -6,6 +6,7 @@ import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:flutter/material.dart';
 
 import 'Home.dart';
+import 'IntroCourse.dart';
 void main() {
   runApp(Favorite());
 }
@@ -93,6 +94,11 @@ class _FavoritePageState extends State<FavoritePage> {
                 itemCount: favoritecourses.length ,
                 itemBuilder: (context,index){
                 return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => IntroCourse(id: favoritecourses[index].id,idInstructor: favoritecourses[index].instructorId)));
+                  },
                   child: Center(
                     child :Card(
                                 color: Colors.black54,

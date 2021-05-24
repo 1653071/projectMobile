@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Authentication/SignIn.dart';
+
+import 'SignUp.dart';
 void main() {
   runApp(MyApp());
 }
@@ -88,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Container(
-
+              margin : EdgeInsets.only(bottom : 10),
               width: 300,
               height: 40.0,
               child: Material(
@@ -117,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Container(
-
+              margin : EdgeInsets.only(bottom : 10),
               width: 300,
               height: 40.0,
               child: Material(
@@ -130,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => SignIn()),
+                        MaterialPageRoute(builder: (context) => SignUp()),
                       );
                     },
                     child:Text(
